@@ -78,7 +78,8 @@ export default class SelectionArea extends EventTarget<SelectionEvents> {
                 touch: true,
                 singleTap: {
                     allow: true,
-                    intersect: 'native'
+                    intersect: 'native',
+                    clear: true
                 }
             },
 
@@ -181,7 +182,8 @@ export default class SelectionArea extends EventTarget<SelectionEvents> {
     }
 
     _onSingleTap(evt: MouseEvent | TouchEvent): void {
-        const {singleTap: {intersect}, range} = this._options.features;
+        const {singleTap: {intersect, clear}, range} = this._options.features;
+        const {stored} = this._selection;
         const e = simplifyEvent(evt);
         let target;
 
@@ -198,6 +200,9 @@ export default class SelectionArea extends EventTarget<SelectionEvents> {
         }
 
         if (!target) {
+            if (clear) {
+                this.clearSelection(true, stored.length === 0);
+            }
             return;
         }
 
@@ -212,6 +217,9 @@ export default class SelectionArea extends EventTarget<SelectionEvents> {
         // Traverse dom upwards to check if target is selectable
         while (!this._selectables.includes(target)) {
             if (!target.parentElement) {
+                if (clear) {
+                    this.clearSelection(true, stored.length === 0);
+                }
                 return;
             }
 
@@ -219,7 +227,6 @@ export default class SelectionArea extends EventTarget<SelectionEvents> {
         }
 
         // Grab current store first in case it gets set back
-        const {stored} = this._selection;
         this._emitEvent('start', evt);
 
         if (evt.shiftKey && stored.length && range) {

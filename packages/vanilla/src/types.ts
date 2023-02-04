@@ -58,6 +58,7 @@ export interface Scrolling {
 export interface SingleTap {
     allow: boolean;
     intersect: TapMode;
+    clear: boolean;
 }
 
 export interface Features {
